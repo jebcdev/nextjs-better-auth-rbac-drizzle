@@ -2,13 +2,17 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-
+import { Toaster } from "sonner";
 import {
     generateAsyncDescription,
     generateAsyncTitle,
     MetadataGeneratorProps,
 } from "@/lib/seo/metadataGenerator";
 import TanStackQueryProvider from "@/features/shared/components/ui/tanstack-query-provider";
+import { ThemeProvider } from "next-themes";
+import { TooltipProvider } from "@/features/shared/components/ui";
+import { PublicHeader } from "@/features/public/components/public-header";
+import { getSessionDetails } from "@/lib/auth";
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 const geistSans = Geist({
@@ -35,7 +39,8 @@ export async function generateMetadata(): Promise<Metadata> {
     };
 }
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+    const { currentUser, userRole } = await getSessionDetails();
     return (
         <html
             lang="en"
@@ -49,9 +54,31 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             )}
         >
             <body className="min-h-full flex flex-col">
-                <TanStackQueryProvider>
-                    {children}
-                </TanStackQueryProvider>
+               <ThemeProvider
+                    attribute="class"
+                    defaultTheme="system"
+                    enableSystem
+                    disableTransitionOnChange
+                >
+                    <TanStackQueryProvider>
+                        <TooltipProvider>
+                            <PublicHeader
+                                currentUser={currentUser}
+                                role={userRole}
+                            />
+                            <Toaster
+                                duration={3000}
+                                position="top-right"
+                                richColors
+                                theme="system" // 👈 así el toast respeta el tema
+                                closeButton
+                            />
+                            <div className="flex flex-1 flex-col">
+                                {children}
+                            </div>
+                        </TooltipProvider>
+                    </TanStackQueryProvider>
+                </ThemeProvider>
             </body>
         </html>
     );
