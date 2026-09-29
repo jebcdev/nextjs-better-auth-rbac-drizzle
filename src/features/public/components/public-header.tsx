@@ -146,7 +146,7 @@ export const PublicHeader = ({
                                     nativeButton={false}
                                     render={
                                         <Link
-                                            href="/panel/cuenta"
+                                            href="/perfil"
                                             className="w-full cursor-pointer"
                                         />
                                     }

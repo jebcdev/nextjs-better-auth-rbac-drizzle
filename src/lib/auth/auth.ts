@@ -7,24 +7,22 @@ import drizzleDB from "../db";
 import * as schema from "@/lib/db/schema"; // Importa todo el schema
 import { randomUUID } from "crypto";
 
-
-
 const auth = betterAuth({
     database: drizzleAdapter(drizzleDB, {
         provider: "pg", // or "mysql", "sqlite"
         // usePlural: true, // Use plural table names (e.g., "users" instead of "user")
-         schema: {
-             user: schema.users,
-             session: schema.sessions,
-             account: schema.accounts,
-             verification: schema.verifications,
-         },
-
+        schema: {
+            user: schema.users,
+            session: schema.sessions,
+            account: schema.accounts,
+            verification: schema.verifications,
+        },
     }),
-    advanced:{
-        database:{
-            generateId: ()=>randomUUID()
-        }
+    advanced: {
+        database: {
+            generateId: () => randomUUID(),
+            // joins: true, // Habilita joins para relaciones entre tablas
+        },
     },
 
     emailAndPassword: {
@@ -62,7 +60,6 @@ const auth = betterAuth({
                 process.env.BETTER_AUTH_URL ??
                 ""
             ).replace(/\/+$/, "");
-
         },
 
         // El enlace de recuperación puede llegar por un canal comprometido. Si
@@ -148,8 +145,10 @@ const auth = betterAuth({
     plugins: [
         admin({
             defaultRole: "user",
-            // Roles que tienen acceso al panel de admin
-            adminUserRoles: ["admin"],
+            // Roles con acceso al panel de admin. La opción se llama
+            // `adminRoles`; `adminUserRoles` no existe y se ignoraba en
+            // silencio, dejando el default ["admin"].
+            adminRoles: ["admin"],
         }),
         nextCookies(),
     ],

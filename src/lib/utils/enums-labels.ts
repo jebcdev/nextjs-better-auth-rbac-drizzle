@@ -1,10 +1,4 @@
-import { userRoleEnum } from "@/lib/db/schema";
-
-// Drizzle no expone los enums como objetos TS (Role.ADMIN, etc.), solo
-// como arrays de strings vía `.enumValues`. Por eso los tipos se derivan
-// así en vez de importarse como enum.
-
-type UserRole = (typeof userRoleEnum.enumValues)[number];
+import type { UserRole } from "@/lib/db/schema";
 
 // ─── ROL DE USUARIO ───────────────────────────────────────────────────────────
 

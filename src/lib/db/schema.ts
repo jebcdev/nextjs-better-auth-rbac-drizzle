@@ -3,7 +3,6 @@ import { InferSelectModel, InferInsertModel } from "drizzle-orm";
 import { defineRelations } from "drizzle-orm";
 import {
     pgTable,
-    pgEnum,
     text,
     boolean,
     timestamp,
@@ -11,26 +10,23 @@ import {
     uuid,
 } from "drizzle-orm/pg-core";
 
-export const userRoleEnum = pgEnum("user_role", [
-    "admin",
-    "user",
-    "guest",
-]);
-
 export const users = pgTable("users", {
     id: uuid("id").primaryKey().defaultRandom(),
     name: text("name").notNull(),
     email: text("email").notNull().unique(),
     emailVerified: boolean("email_verified").default(false).notNull(),
     image: text("image"),
-    role: userRoleEnum("role").default("user").notNull(),
+    // Admin plugin: text, NO enum. better-auth almacena multi-rol como CSV
+    // (`setRole` acepta `string[]` y los une con ","), y los roles registrados
+    // con `ac.newRole()` son abiertos. Un pgEnum no puede representar eso.
+    role: text("role").default("user").notNull(),
     banned: boolean("banned").default(false),
     banReason: text("ban_reason"),
-    banExpires: timestamp("ban_expires"),
+    banExpires: timestamp("ban_expires", { mode: "date" }),
     isActive: boolean("is_active").default(true),
     tenantId: text("tenant_id"),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at")
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" })
         .defaultNow()
         .$onUpdate(() => new Date())
         .notNull(),
@@ -40,10 +36,10 @@ export const sessions = pgTable(
     "sessions",
     {
         id: uuid("id").primaryKey().defaultRandom(),
-        expiresAt: timestamp("expires_at").notNull(),
+        expiresAt: timestamp("expires_at", { mode: "date" }).notNull(),
         token: text("token").notNull().unique(),
-        createdAt: timestamp("created_at").defaultNow().notNull(),
-        updatedAt: timestamp("updated_at")
+        createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+        updatedAt: timestamp("updated_at", { mode: "date" })
             .defaultNow()
             .$onUpdate(() => new Date())
             .notNull(),
@@ -69,12 +65,12 @@ export const accounts = pgTable(
         accessToken: text("access_token"),
         refreshToken: text("refresh_token"),
         idToken: text("id_token"),
-        accessTokenExpiresAt: timestamp("access_token_expires_at"),
-        refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
+        accessTokenExpiresAt: timestamp("access_token_expires_at", { mode: "date" }),
+        refreshTokenExpiresAt: timestamp("refresh_token_expires_at", { mode: "date" }),
         scope: text("scope"),
         password: text("password"),
-        createdAt: timestamp("created_at").defaultNow().notNull(),
-        updatedAt: timestamp("updated_at")
+        createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+        updatedAt: timestamp("updated_at", { mode: "date" })
             .defaultNow()
             .$onUpdate(() => new Date())
             .notNull(),
@@ -88,9 +84,9 @@ export const verifications = pgTable(
         id: uuid("id").primaryKey().defaultRandom(),
         identifier: text("identifier").notNull(),
         value: text("value").notNull(),
-        expiresAt: timestamp("expires_at").notNull(),
-        createdAt: timestamp("created_at").defaultNow().notNull(),
-        updatedAt: timestamp("updated_at")
+        expiresAt: timestamp("expires_at", { mode: "date" }).notNull(),
+        createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+        updatedAt: timestamp("updated_at", { mode: "date" })
             .defaultNow()
             .$onUpdate(() => new Date())
             .notNull(),
@@ -140,8 +136,14 @@ export const relations = defineRelations(
 // TIPOS INFERIDOS
 // ==========================================
 
-// Enums
-export type UserRole = (typeof userRoleEnum.enumValues)[number];
+// Rol de usuario.
+//
+// La columna `role` es `text` a propósito: el plugin admin guarda multi-rol
+// como CSV (`setRole` acepta `string[]` y los une con ","), de modo que un
+// `pgEnum` no podría representar "user,admin". Estos tipos son el conjunto
+// conocido en la app, no el dominio cerrado de la base de datos. Para los
+// roles dinámicos de `createAccessControl`, añade variantes aquí.
+export type UserRole = "admin" | "user" | "guest";
 
 // Auth
 export type UsersSelect = InferSelectModel<typeof users>;
@@ -156,3 +158,18 @@ export type VerificationsSelect = InferSelectModel<
 export type VerificationsInsert = InferInsertModel<
     typeof verifications
 >;
+
+export type UserWithSessions = UsersSelect & {
+    sessions: SessionsSelect[];
+};
+
+export type UserWithAccounts = UsersSelect & {
+    accounts: AccountsSelect[];
+};
+
+// El "perfil completo": usuario + sesiones + cuentas.
+// Es el tipo que devuelve `getFullUserInformation`.
+export type FullUser = UsersSelect & {
+    sessions: SessionsSelect[];
+    accounts: AccountsSelect[];
+};

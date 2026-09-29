@@ -39,7 +39,11 @@ export async function generateMetadata(): Promise<Metadata> {
     };
 }
 
-export default async function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
     const { currentUser, userRole } = await getSessionDetails();
     return (
         <html
@@ -52,9 +56,10 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
                 "font-sans",
                 inter.variable,
             )}
+            suppressHydrationWarning
         >
             <body className="min-h-full flex flex-col">
-               <ThemeProvider
+                <ThemeProvider
                     attribute="class"
                     defaultTheme="system"
                     enableSystem

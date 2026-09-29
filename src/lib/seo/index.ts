@@ -6,3 +6,4 @@ export {
     generateAsyncTitle,
     generateAsyncDescription,
 } from "./metadataGenerator";
+export type { MetadataGeneratorProps } from "./metadataGenerator";
