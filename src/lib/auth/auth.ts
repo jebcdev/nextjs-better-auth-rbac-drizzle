@@ -6,21 +6,10 @@ import { nextCookies } from "better-auth/next-js";
 import drizzleDB from "../db";
 import * as schema from "@/lib/db/schema"; // Importa todo el schema
 import { randomUUID } from "crypto";
-import { sendEmail } from "@/lib/utils/send-email";
-
-/**
- * Origen público de la aplicación, sin barra final.
- *
- * better-auth compone sus enlaces de verificación y recuperación contra su
- * `baseURL`, que es la ruta que montaría SU propio handler HTTP. Esta
- * aplicación no monta ninguno, así que todos los enlaces se rehacen aquí contra
- * las rutas reales, que además están en español.
- */
-const APP_URL = (
-    process.env.NEXT_PUBLIC_APP_URL ??
-    process.env.BETTER_AUTH_URL ??
-    ""
-).replace(/\/+$/, "");
+import {
+    sendResetPassword as sendResetPasswordMessage,
+    sendVerificationEmail as sendVerificationEmailMessage,
+} from "@/lib/emails";
 
 const auth = betterAuth({
     database: drizzleAdapter(drizzleDB, {
@@ -54,27 +43,16 @@ const auth = betterAuth({
         // señuelo para que tampoco se distinga por tiempo).
         //
         // ⚠️ `sendResetPassword` es obligatorio: sin él better-auth lanza
-        // RESET_PASSWORD_DISABLED y no hay flujo de recuperación. Hoy entrega a
-        // través de una costura sin proveedor configurado — ver
-        // `src/lib/utils/send-email.ts`, que documenta qué falta.
+        // RESET_PASSWORD_DISABLED y no hay flujo de recuperación. La entrega
+        // delega en `src/lib/emails/`; sin `MAILTRAP_API_TOKEN` el transporte
+        // es un no-op silencioso y el flujo completa igual.
         //
-        // ⚠️ El `url` que entrega better-auth **se descarta y se rehace aquí**.
-        // better-auth compone `${baseURL}/reset-password/<token>?callbackURL=…`
-        // y espera que su propio endpoint `GET /reset-password/:token` reciba
-        // ese enlace y redirija al `callbackURL`. Ese endpoint solo existe si se
-        // monta un handler HTTP, y esta aplicación no monta ninguno (mismo motivo
-        // que el limitador de `rate-limit.ts`). Con el `url` tal cual, el correo
-        // apuntaría a una ruta inexistente.
-        //
-        // better-auth sí nos entrega el `token` crudo, así que el enlace se
-        // construye contra la ruta real de la aplicación, que es en español como
-        // el resto de URLs.
+        // ⚠️ El `url` que entrega better-auth **se descarta y se rehace en
+        // `src/lib/emails/auth-handlers.ts`** contra `/restablecer-contrasena`,
+        // la página real que consume el token (mismo motivo documentado allí
+        // que para la verificación: esta app no monta handler HTTP).
         sendResetPassword: async ({ user, token }) => {
-            const appUrl = (
-                process.env.NEXT_PUBLIC_APP_URL ??
-                process.env.BETTER_AUTH_URL ??
-                ""
-            ).replace(/\/+$/, "");
+            await sendResetPasswordMessage({ user, token });
         },
 
         // El enlace de recuperación puede llegar por un canal comprometido. Si
@@ -96,37 +74,30 @@ const auth = betterAuth({
     // tampoco existe `auth.api.changeEmail` utilizable. Es la razón por la que
     // el flujo de cambio de dirección no puede construirse sin esta línea.
     emailVerification: {
-        // ⚠️ better-auth compone `${baseURL}/verify-email?token=…` y espera que
-        // SU propio endpoint `GET /verify-email` reciba ese enlace y redirija al
-        // `callbackURL`. Ese endpoint solo existe montando un handler HTTP, y
-        // esta aplicación no monta ninguno (mismo motivo que el limitador de
-        // `rate-limit.ts`). Con la `url` tal cual, el correo apuntaría a una
-        // ruta inexistente.
+        // ⚠️ El `url` que entrega better-auth **se descarta y se rehace en
+        // `src/lib/emails/auth-handlers.ts`** contra la ruta real
+        // `/perfil/confirmar-email` —la página que llama a
+        // `auth.api.verifyEmail`—, en español como el resto de URLs. El `url`
+        // crudo apuntaría al endpoint que esta aplicación no monta (mismo
+        // motivo que el limitador de `rate-limit.ts`).
         //
-        // better-auth sí nos entrega el `token` crudo, así que el enlace se
-        // construye contra la ruta real de la aplicación, en español como el
-        // resto de URLs, y es esa página la que llama a `auth.api.verifyEmail`.
-        //
-        // ⚠️ Sin proveedor de correo configurado, la entrega pasa por una costura
-        // vacía: ver `src/lib/utils/send-email.ts`, que documenta qué falta.
+        // La entrega la hace `src/lib/emails/`: sin `MAILTRAP_API_TOKEN` el
+        // transporte es un no-op silencioso y el flujo de auth completa igual.
         sendVerificationEmail: async ({ user, token }) => {
             // En el flujo de cambio de dirección better-auth entrega aquí el
             // usuario con `email` YA sustituida por la nueva: el mensaje va a la
             // dirección nueva, que es justo lo que hay que probar.
-            await sendEmail({
-                to: user.email,
-                subject: "Confirma tu nuevo correo electrónico",
-                url: `${APP_URL}/perfil/confirmar-email?token=${encodeURIComponent(
-                    token,
-                )}`,
-            });
+            await sendVerificationEmailMessage({ user, token });
         },
 
-        // `requireEmailVerification: false` arriba significa que el alta no exige
-        // verificar. Se declara explícitamente en vez de dejar `undefined` —que
-        // heredaría ese `false`— para que un cambio futuro en la política de
+        // `sendOnSignUp: true` con `requireEmailVerification: false` (decisión
+        // D16, actualizada): mejor-auth decide la emisión al alta con
+        // `sendOnSignUp ?? requireEmailVerification`, así que el correo de
+        // activación SÍ sale al registrarse, pero la verificación sigue sin ser
+        // requisito para operar. El `false` de `requireEmailVerification` se
+        // mantiene declarado arriba para que un cambio futuro en la política de
         // verificación no altere en silencio el alta de usuarios nuevos.
-        sendOnSignUp: false,
+        sendOnSignUp: true,
     },
 
     // ── Vida de la sesión, explícita y no el default de la librería ────────
