@@ -168,7 +168,18 @@ export type UserWithAccounts = UsersSelect & {
 };
 
 // El "perfil completo": usuario + sesiones + cuentas.
-// Es el tipo que devuelve `getFullUserInformation`.
+//
+// ⚠️ TIPO SOLO DE SERVIDOR. `AccountsSelect` y `SessionsSelect` incluyen
+// `password`, `accessToken`, `refreshToken`, `idToken` y `sessions.token`.
+// Devolver `FullUser` desde una server action a un Client Component serializa
+// esas credenciales dentro del payload RSC y las publica en el navegador, donde
+// cualquier usuario autenticado puede leerlas en las devtools.
+//
+// La alternativa segura es `ProfileViewModel`
+// (`src/features/private/profile/types/profile-view-model.ts`), que es la
+// proyección explícita que `getFullUserInformation` construye antes de
+// devolver. La acción además está marcada `server-only`, para que un `import`
+// futuro desde el cliente sea un error de build y no una fuga silenciosa.
 export type FullUser = UsersSelect & {
     sessions: SessionsSelect[];
     accounts: AccountsSelect[];

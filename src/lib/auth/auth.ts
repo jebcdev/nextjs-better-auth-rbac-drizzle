@@ -6,6 +6,21 @@ import { nextCookies } from "better-auth/next-js";
 import drizzleDB from "../db";
 import * as schema from "@/lib/db/schema"; // Importa todo el schema
 import { randomUUID } from "crypto";
+import { sendEmail } from "@/lib/utils/send-email";
+
+/**
+ * Origen público de la aplicación, sin barra final.
+ *
+ * better-auth compone sus enlaces de verificación y recuperación contra su
+ * `baseURL`, que es la ruta que montaría SU propio handler HTTP. Esta
+ * aplicación no monta ninguno, así que todos los enlaces se rehacen aquí contra
+ * las rutas reales, que además están en español.
+ */
+const APP_URL = (
+    process.env.NEXT_PUBLIC_APP_URL ??
+    process.env.BETTER_AUTH_URL ??
+    ""
+).replace(/\/+$/, "");
 
 const auth = betterAuth({
     database: drizzleAdapter(drizzleDB, {
@@ -74,6 +89,46 @@ const auth = betterAuth({
         resetPasswordTokenExpiresIn: 60 * 60,
     },
 
+    // ── Verificación de correo (decisión D16) ───────────────────────────────
+    //
+    // better-auth solo emite un token de verificación si este bloque está
+    // declarado: sin `sendVerificationEmail` NO existe la función, y por tanto
+    // tampoco existe `auth.api.changeEmail` utilizable. Es la razón por la que
+    // el flujo de cambio de dirección no puede construirse sin esta línea.
+    emailVerification: {
+        // ⚠️ better-auth compone `${baseURL}/verify-email?token=…` y espera que
+        // SU propio endpoint `GET /verify-email` reciba ese enlace y redirija al
+        // `callbackURL`. Ese endpoint solo existe montando un handler HTTP, y
+        // esta aplicación no monta ninguno (mismo motivo que el limitador de
+        // `rate-limit.ts`). Con la `url` tal cual, el correo apuntaría a una
+        // ruta inexistente.
+        //
+        // better-auth sí nos entrega el `token` crudo, así que el enlace se
+        // construye contra la ruta real de la aplicación, en español como el
+        // resto de URLs, y es esa página la que llama a `auth.api.verifyEmail`.
+        //
+        // ⚠️ Sin proveedor de correo configurado, la entrega pasa por una costura
+        // vacía: ver `src/lib/utils/send-email.ts`, que documenta qué falta.
+        sendVerificationEmail: async ({ user, token }) => {
+            // En el flujo de cambio de dirección better-auth entrega aquí el
+            // usuario con `email` YA sustituida por la nueva: el mensaje va a la
+            // dirección nueva, que es justo lo que hay que probar.
+            await sendEmail({
+                to: user.email,
+                subject: "Confirma tu nuevo correo electrónico",
+                url: `${APP_URL}/perfil/confirmar-email?token=${encodeURIComponent(
+                    token,
+                )}`,
+            });
+        },
+
+        // `requireEmailVerification: false` arriba significa que el alta no exige
+        // verificar. Se declara explícitamente en vez de dejar `undefined` —que
+        // heredaría ese `false`— para que un cambio futuro en la política de
+        // verificación no altere en silencio el alta de usuarios nuevos.
+        sendOnSignUp: false,
+    },
+
     // ── Vida de la sesión, explícita y no el default de la librería ────────
     // Decisión D7 de openspec/changes/04-harden-authentication/.
     //
@@ -124,6 +179,27 @@ const auth = betterAuth({
                 input: true, // Permitir asignarlo al registrar
             },
         },
+
+        // ── Cambio de dirección (decisión D16) ─────────────────────────────
+        //
+        // Es un flujo aparte y con verificación, NO un campo más del parche de
+        // perfil: la dirección nueva no se guarda al solicitarla, sino cuando
+        // quien la controla confirma desde ella. Escribirla de inmediato sería
+        // tomar el control de la identidad de la cuenta sin prueba de nada.
+        //
+        // ⚠️ `sendChangeEmailConfirmation` se deja APAGADO a propósito. Con él
+        // activado, better-auth envía el primer correo a la dirección VIEJA para
+        // pedir permiso, y solo después el de verificación a la nueva. Eso es la
+        // política de un producto donde el titular puede perder la cuenta por un
+        // cambio malicioso; aquí el escenario es el contrario —el propio titular
+        // mueve su correo—, así que el mensaje debe llegar a la dirección
+        // nueva, que es la que hay que probar. Con la opción apagada,
+        // `changeEmail` entrega el `user` con `email` ya sustituida y ese es el
+        // destinatario real (ver `sendVerificationEmail` más arriba).
+        //
+        // `updateEmailWithoutVerification` se queda en su default (`false`) por la
+        // misma razón: sin verificación no hay cambio de dirección.
+        changeEmail: { enabled: true },
     },
 
     databaseHooks: {
