@@ -2,7 +2,11 @@
 
 import type { ProfileViewModel } from "@/features/private/profile/types";
 import { getUserRoleLabel } from "@/lib/utils/enums-labels";
-import { Avatar, AvatarFallback, AvatarImage } from "@/features/shared/components/ui/avatar";
+import {
+    Avatar,
+    AvatarFallback,
+    AvatarImage,
+} from "@/features/shared/components/ui/avatar";
 import { Badge } from "@/features/shared/components/ui/badge";
 import {
     Card,
@@ -11,7 +15,11 @@ import {
     CardHeader,
     CardTitle,
 } from "@/features/shared/components/ui/card";
-import { NameSection, AvatarSection, EmailSection, PasswordSection } from "./profile-sections";
+import {
+    NameSection,
+    AvatarSection,
+    /*EmailSection,-*/ PasswordSection,
+} from "./profile-sections";
 
 /**
  * Tarjeta de identidad + resúmenes de solo lectura.
@@ -35,7 +43,9 @@ type Props = {
  */
 const initialsOf = (name: string): string => {
     const words = name.trim().split(/\s+/).filter(Boolean);
-    const letters = words.slice(0, 2).map((word) => word[0]?.toUpperCase() ?? "");
+    const letters = words
+        .slice(0, 2)
+        .map((word) => word[0]?.toUpperCase() ?? "");
     const initials = letters.join("");
 
     // Un nombre de un solo carácter, o de solo espacios, no produce iniciales
@@ -70,10 +80,16 @@ const formatDate = (iso: string): string =>
     }).format(new Date(iso));
 
 /** Una fila etiqueta/valor de solo lectura. Nunca un input. */
-const DetailRow = ({ label, value }: { label: string; value: string }) => (
+const DetailRow = ({
+    label,
+    value,
+}: {
+    label: string;
+    value: string;
+}) => (
     <div className="flex flex-col gap-0.5">
         <span className="text-xs text-muted-foreground">{label}</span>
-        <span className="text-sm break-words">{value}</span>
+        <span className="text-sm wrap-break-word">{value}</span>
     </div>
 );
 
@@ -88,8 +104,8 @@ export const ProfileDetails = ({ profile }: Props) => {
                     <CardHeader>
                         <CardTitle>Identidad</CardTitle>
                         <CardDescription>
-                            Estos datos identifican tu cuenta. El rol no se
-                            edita desde aquí.
+                            Estos datos identifican tu cuenta. El rol
+                            no se edita desde aquí.
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="grid gap-4">
@@ -99,17 +115,20 @@ export const ProfileDetails = ({ profile }: Props) => {
                                     como contenido, en vez de dejar la imagen
                                     rota del spec. */}
                                 {profile.image && (
-                                    <AvatarImage src={profile.image} alt="" />
+                                    <AvatarImage
+                                        src={profile.image}
+                                        alt=""
+                                    />
                                 )}
                                 <AvatarFallback>
                                     {initialsOf(profile.name)}
                                 </AvatarFallback>
                             </Avatar>
                             <div className="grid gap-1">
-                                <span className="font-heading text-base font-medium break-words">
+                                <span className="font-heading text-base font-medium wrap-break-word">
                                     {profile.name}
                                 </span>
-                                <span className="text-sm text-muted-foreground break-words">
+                                <span className="text-sm text-muted-foreground wrap-break-word">
                                     {profile.email}
                                 </span>
                             </div>
@@ -119,7 +138,10 @@ export const ProfileDetails = ({ profile }: Props) => {
                             {/* El rol es una ETIQUETA, nunca un input: un
                                 input deshabilitado sigue siendo enfocable y
                                 anuncia «campo editable» (decisión D20). */}
-                            <Badge variant="secondary" data-slot="role-badge">
+                            <Badge
+                                variant="secondary"
+                                data-slot="role-badge"
+                            >
                                 {roleLabelOf(profile.role)}
                             </Badge>
                             <Badge
@@ -172,11 +194,15 @@ export const ProfileDetails = ({ profile }: Props) => {
                                     />
                                     <DetailRow
                                         label="Vinculada el"
-                                        value={formatDate(account.createdAt)}
+                                        value={formatDate(
+                                            account.createdAt,
+                                        )}
                                     />
                                     <DetailRow
                                         label="Actualizada el"
-                                        value={formatDate(account.updatedAt)}
+                                        value={formatDate(
+                                            account.updatedAt,
+                                        )}
                                     />
                                 </div>
                             ))
@@ -189,8 +215,8 @@ export const ProfileDetails = ({ profile }: Props) => {
                     <CardHeader>
                         <CardTitle>Sesiones</CardTitle>
                         <CardDescription>
-                            Solo lectura. Cerrar sesiones no se hace desde
-                            aquí.
+                            Solo lectura. Cerrar sesiones no se hace
+                            desde aquí.
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="grid gap-3">
@@ -202,35 +228,43 @@ export const ProfileDetails = ({ profile }: Props) => {
                             <DetailRow
                                 label="Esta sesión caduca el"
                                 value={formatDate(
-                                    profile.sessions.currentSessionExpiresAt,
+                                    profile.sessions
+                                        .currentSessionExpiresAt,
                                 )}
                             />
                         )}
 
                         {profile.sessions.entries.length > 0 && (
                             <ul className="grid gap-2 border-t pt-3">
-                                {profile.sessions.entries.map((entry) => (
-                                    <li
-                                        key={entry.id}
-                                        className="grid gap-0.5"
-                                    >
-                                        <span className="text-sm break-words">
-                                            {entry.userAgent ?? "Dispositivo desconocido"}
-                                            {entry.isCurrent && (
-                                                <Badge
-                                                    variant="outline"
-                                                    className="ml-2"
-                                                >
-                                                    Esta
-                                                </Badge>
-                                            )}
-                                        </span>
-                                        <span className="text-xs text-muted-foreground break-all">
-                                            {entry.ipAddress ?? "IP desconocida"} ·
-                                            caduca el {formatDate(entry.expiresAt)}
-                                        </span>
-                                    </li>
-                                ))}
+                                {profile.sessions.entries.map(
+                                    (entry) => (
+                                        <li
+                                            key={entry.id}
+                                            className="grid gap-0.5"
+                                        >
+                                            <span className="text-sm wrap-break-word">
+                                                {entry.userAgent ??
+                                                    "Dispositivo desconocido"}
+                                                {entry.isCurrent && (
+                                                    <Badge
+                                                        variant="outline"
+                                                        className="ml-2"
+                                                    >
+                                                        Esta
+                                                    </Badge>
+                                                )}
+                                            </span>
+                                            <span className="text-xs text-muted-foreground break-all">
+                                                {entry.ipAddress ??
+                                                    "IP desconocida"}{" "}
+                                                · caduca el{" "}
+                                                {formatDate(
+                                                    entry.expiresAt,
+                                                )}
+                                            </span>
+                                        </li>
+                                    ),
+                                )}
                             </ul>
                         )}
                     </CardContent>
@@ -243,7 +277,7 @@ export const ProfileDetails = ({ profile }: Props) => {
             <div className="grid content-start gap-4">
                 <NameSection name={profile.name} />
                 <AvatarSection hasImage={Boolean(profile.image)} />
-                <EmailSection email={profile.email} />
+                {/* <EmailSection email={profile.email} /> */}
                 <PasswordSection />
             </div>
         </div>

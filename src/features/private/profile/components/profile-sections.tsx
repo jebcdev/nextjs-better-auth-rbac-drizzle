@@ -386,6 +386,7 @@ export const AvatarSection = ({ hasImage }: { hasImage: boolean }) => {
  * los otros dos editores, que sí escriben, y porque el aviso de D10 —un
  * parpadeo del esqueleto— ya está aceptado como precio de la corrección.
  */
+/*
 export const EmailSection = ({ email }: { email: string }) => {
     const router = useRouter();
 
@@ -448,7 +449,7 @@ export const EmailSection = ({ email }: { email: string }) => {
         </Section>
     );
 };
-
+*/
 // ══════════════════════════════════════════════════════════════════════════════
 // CONTRASEÑA
 // ══════════════════════════════════════════════════════════════════════════════
