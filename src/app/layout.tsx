@@ -12,7 +12,7 @@ import TanStackQueryProvider from "@/features/shared/components/ui/tanstack-quer
 import { ThemeProvider } from "next-themes";
 import { TooltipProvider } from "@/features/shared/components/ui";
 import { PublicHeader } from "@/features/public/components/public-header";
-import { getSessionDetails } from "@/lib/auth";
+import { getSessionDetails } from "@/lib/auth/session-details";
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 const geistSans = Geist({

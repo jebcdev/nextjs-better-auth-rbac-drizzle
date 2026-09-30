@@ -1,5 +1,7 @@
 {
     "exportall.config.folderListener": [
-        "/src/features/shared/components/ui"
+        "/src/features/shared/components/ui",
+        "/src/features/private/dashboard/types",
+        "/src/features/private/dashboard/components"
     ]
 }

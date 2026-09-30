@@ -3,22 +3,23 @@ import { getSessionDetails } from "@/lib/auth/session-details";
 import {
     generateAsyncTitle,
     generateAsyncDescription,
-    MetadataGeneratorProps,
+    type MetadataGeneratorProps,
 } from "@/lib/seo";
-
+import { PrivateDashboardSidebar } from "@/features/private/dashboard/components";
 import { redirect } from "next/navigation";
 
 const pageData: MetadataGeneratorProps = {
-    title: "Inicio",
-    description: "Inicio de el Sistema",
+    title: "Panel",
+    description: "Panel del Sistema",
 };
 
 export async function generateMetadata(): Promise<Metadata> {
+    const dynamicTitle = await generateAsyncTitle(pageData.title);
+    const dynamicDescription = await generateAsyncDescription(pageData.description);
+
     return {
-        title: await generateAsyncTitle(pageData.title),
-        description: await generateAsyncDescription(
-            pageData.description,
-        ),
+        title: dynamicTitle,
+        description: dynamicDescription,
     };
 }
 
@@ -32,11 +33,15 @@ export default async function PrivateLayout({
         return redirect("/iniciar-sesion");
     }
 
-    // Redirect customer role away from the private panel
-
     return (
-        <>
-            <main>{children}</main>
-        </>
+        <div className="flex flex-1 min-h-[calc(100vh-4rem)] bg-background text-foreground">
+            <PrivateDashboardSidebar userRole={userRole} />
+            {/* Margen izquierdo responsivo para dejar espacio al sidebar fijo (md:pl-64) */}
+            <main className="flex-1 md:pl-64 transition-all duration-300 flex flex-col">
+                <div className="p-6 md:p-8 flex-1">
+                    {children}
+                </div>
+            </main>
+        </div>
     );
 }

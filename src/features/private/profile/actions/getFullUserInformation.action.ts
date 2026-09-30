@@ -15,7 +15,7 @@
 // un Client Component. Ver `types/profile-view-model.ts` para el contrato.
 import "server-only";
 
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 import drizzleDB from "@/lib/db";
 import { IGeneralResponse } from "@/features/shared/types";
 import { headers } from "next/headers";
