@@ -8,13 +8,12 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { hasRequiredRole } from "@/lib/auth/role-guard";
 import { PrivateDashboardHeader } from "@/features/private/dashboard/components";
-import {
-    DashboardAdminUsersForm,
-    getUserByIdAction,
-    ADMIN_USERS_ROLES,
-} from "@/features/private/dashboard/admin/users";
+
+
 import { Button } from "@/features/shared/components/ui/button";
 import { ArrowLeftIcon } from "lucide-react";
+import { ADMIN_USERS_ROLES, DashboardAdminUsersForm } from "@/features/private/dashboard/admin/users/components";
+import { getUserByIdAction } from "@/features/private/dashboard/admin/users/actions";
 
 // Sin anotación `MetadataGeneratorProps`: sus campos son opcionales y
 // `pageData.title` quedaría como `string | undefined`, que `PrivateDashboardHeader`

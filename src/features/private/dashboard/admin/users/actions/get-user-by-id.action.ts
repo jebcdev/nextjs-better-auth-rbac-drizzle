@@ -18,15 +18,29 @@
 // la cuadrícula, así que la condición para devolverlo tiene que ser la misma.
 
 import drizzleDB from "@/lib/db";
-import { users } from "@/lib/db/schema";
+import { UserRole, users } from "@/lib/db/schema";
 import { getSessionDetails } from "@/lib/auth/session-details";
 import { hasRequiredRole } from "@/lib/auth/role-guard";
 import { consoleLogger } from "@/lib/logger/console-logger";
 import { IGeneralResponse } from "@/features/shared/types";
 import { ADMIN_USERS_ROLES } from "../components/grid";
-import type { AdminUserEditItem } from "../components/form";
+
 import { GetUserByIdSchema } from "../validations";
 
+ interface AdminUserEditItem {
+    id: string;
+    name: string;
+    email: string;
+    image: string | null;
+    /** Un solo rol, tal y como lo declara el enum de la columna. */
+    role: UserRole;
+    isActive: boolean;
+    banned: boolean;
+    /** ISO 8601. */
+    createdAt: string;
+    /** ISO 8601. */
+    updatedAt: string;
+}
 type GetUserByIdReason =
     | "invalid_input"
     | "no_session"
