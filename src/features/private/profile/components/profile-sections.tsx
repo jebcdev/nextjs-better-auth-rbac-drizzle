@@ -8,13 +8,13 @@ import { toast } from "sonner";
 
 import {
     updateProfileAction,
-    changeEmailAction,
+    // changeEmailAction,
 } from "@/features/private/profile/actions";
 import {
     UpdateProfileSchema,
-    ChangeEmailSchema,
+    // ChangeEmailSchema,
     type UpdateProfileData,
-    type ChangeEmailData,
+    // type ChangeEmailData,
 } from "@/features/private/profile/validations";
 import { ChangePasswordForm } from "@/features/public/auth/components";
 import {

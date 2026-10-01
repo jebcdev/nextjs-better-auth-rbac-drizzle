@@ -53,7 +53,12 @@ const useListingParams = (): AdminUsersListParams => {
     }, [searchParams]);
 };
 
-export const AdminDashboardUsersGrid = () => {
+export const AdminDashboardUsersGrid = ({
+    viewerId,
+}: {
+    /** Id de quien mira la lista. Solo se reenvía: la tarjeta decide. */
+    viewerId: string;
+}) => {
     const params = useListingParams();
     const { data, isLoading, isError, refetch } = useAdminUsersQuery({
         params,
@@ -114,6 +119,7 @@ export const AdminDashboardUsersGrid = () => {
                         <AdminDashboardUsersGridCard
                             key={user.id}
                             user={user}
+                            viewerId={viewerId}
                         />
                     ))}
                 </div>

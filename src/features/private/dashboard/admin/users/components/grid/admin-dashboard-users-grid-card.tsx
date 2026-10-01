@@ -1,7 +1,5 @@
 "use client";
 
-import Link from "next/link";
-
 import {
     Avatar,
     AvatarFallback,
@@ -14,13 +12,12 @@ import {
 } from "@/lib/utils/enums-labels";
 import type { UserRole } from "@/lib/db/schema";
 
-import {
-    ADMIN_USERS_DETAIL_PATH,
-    type AdminUserListItem,
-} from ".";
+import { AdminUserCardActions, type AdminUserListItem } from ".";
 
 interface Props {
     user: AdminUserListItem;
+    /** Id de quien mira la lista, para no ofrecer cambiar la cuenta propia. */
+    viewerId: string;
 }
 
 /**
@@ -79,79 +76,81 @@ const formatDate = (iso: string): string =>
     );
 
 /**
- * Tarjeta de SOLO LECTURA.
+ * Tarjeta de una cuenta del directorio.
  *
- * ⚠️ No hay ningún control que escriba en la cuenta: ni botones, ni formulario,
- * ni mutación. La tarjeta entera es un enlace a la página de edición, que ya
- * existe. Activarla navega y no cambia ningún valor almacenado.
+ * ⚠️ El elemento raíz es el `<article>`, y ya NO es un enlace. Antes lo era: la
+ * tarjeta entera envolvía un `<Link>` y no llevaba ningún control. Ahora lleva
+ * tres controles, y un `<button>` dentro de un `<a>` es un elemento interactivo
+ * anidado dentro de otro, que es HTML inválido y un fallo de accesibilidad. Por
+ * eso la navegación se movió al control de editar de
+ * `admin-user-card-actions.tsx` y la tarjeta dejó de ser un destino. Es el
+ * mismo motivo por el que `dashboard-header.tsx` sigue siendo un defecto: allí
+ * el enlace se metió DENTRO del botón; aquí ocurre al revés y el arreglo es el
+ * mismo, un `render` en vez de un anidamiento.
  *
- * ⚠️ El enlace envuelve a la tarjeta en vez de usar `Button` con `action.path`
- * como hace `dashboard-header.tsx`: un `<a>` dentro de un `<button>` produce un
- * elemento interactivo anidado dentro de otro, que es un fallo de accesibilidad
- * y de HTML válido. Aquí no hay nada anidado.
+ * ⚠️ El id de quien mira la lista llega por prop (`viewerId`) y NO se vuelve a
+ * derivar aquí. La tarjeta no sabe de sesiones: solo sabe a quién pertenece la
+ * fila que está dibujando. La decisión de si ese "alguien" puede o no tocar los
+ * controles se toma una vez, en la página.
  */
-export const AdminDashboardUsersGridCard = ({ user }: Props) => {
+export const AdminDashboardUsersGridCard = ({
+    user,
+    viewerId,
+}: Props) => {
     const roleLabels = roleLabelsOf(user.role);
 
     return (
-        <Link
-            href={`${ADMIN_USERS_DETAIL_PATH}/${user.id}`}
-            className="block rounded-2xl transition-shadow focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-        >
-            <article className="h-full rounded-2xl border border-border bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
-                <div className="flex items-start gap-3">
-                    <Avatar size="lg">
-                        {/* `src={null}` mantiene el `AvatarFallback` como
-                            contenido en vez de dejar la imagen rota. */}
-                        {user.image && (
-                            <AvatarImage src={user.image} alt="" />
-                        )}
-                        <AvatarFallback>
-                            {initialsOf(user.name)}
-                        </AvatarFallback>
-                    </Avatar>
+        <article className="flex h-full flex-col rounded-2xl border border-border bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
+            <div className="flex items-start gap-3">
+                <Avatar size="lg">
+                    {/* `src={null}` mantiene el `AvatarFallback` como
+                        contenido en vez de dejar la imagen rota. */}
+                    {user.image && <AvatarImage src={user.image} alt="" />}
+                    <AvatarFallback>{initialsOf(user.name)}</AvatarFallback>
+                </Avatar>
 
-                    <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-foreground truncate">
-                            {user.name}
-                        </h3>
-                        <p className="text-xs text-muted-foreground truncate">
-                            {user.email}
-                        </p>
-                    </div>
+                <div className="flex-1 min-w-0">
+                    <h3 className="font-medium text-foreground truncate">
+                        {user.name}
+                    </h3>
+                    <p className="text-xs text-muted-foreground truncate">
+                        {user.email}
+                    </p>
+                </div>
+            </div>
+
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+                {roleLabels.map((label) => (
+                    <Badge key={label} variant="secondary">
+                        {label}
+                    </Badge>
+                ))}
+            </div>
+
+            {/* ⚠️ El `mb-4` de aquí es el MÍNIMO de espacio bajo la fila de
+                insignias, y el `mt-auto` de la fila de controles se lleva el
+                sobrante. Con las tarjetas estiradas a la misma altura en la
+                cuadrícula, esa pareja es lo que deja los tres controles de todas
+                las tarjetas de una fila a la misma altura, sin importar cuánto
+                ocupe el nombre de cada cuenta. */}
+            <div className="mt-3 mb-4 flex flex-wrap items-center justify-between gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                    <Badge
+                        variant={user.isActive ? "default" : "destructive"}
+                    >
+                        {user.isActive ? "Activo" : "Inactivo"}
+                    </Badge>
+                    {user.banned && (
+                        <Badge variant="destructive">Baneado</Badge>
+                    )}
                 </div>
 
-                <div className="mt-3 flex flex-wrap items-center gap-2">
-                    {roleLabels.map((label) => (
-                        <Badge key={label} variant="secondary">
-                            {label}
-                        </Badge>
-                    ))}
-                </div>
+                <span className="text-xs text-muted-foreground">
+                    Creado el {formatDate(user.createdAt)}
+                </span>
+            </div>
 
-                <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                        <Badge
-                            variant={
-                                user.isActive
-                                    ? "default"
-                                    : "destructive"
-                            }
-                        >
-                            {user.isActive ? "Activo" : "Inactivo"}
-                        </Badge>
-                        {user.banned && (
-                            <Badge variant="destructive">
-                                Baneado
-                            </Badge>
-                        )}
-                    </div>
-
-                    <span className="text-xs text-muted-foreground">
-                        Creado el {formatDate(user.createdAt)}
-                    </span>
-                </div>
-            </article>
-        </Link>
+            <AdminUserCardActions user={user} viewerId={viewerId} />
+        </article>
     );
 };

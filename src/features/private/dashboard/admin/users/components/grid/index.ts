@@ -2,6 +2,7 @@ export { AdminDashboardUsersFilters } from "./admin-dashboard-users-filters";
 export { AdminDashboardUsersGridCard } from "./admin-dashboard-users-grid-card";
 export { AdminDashboardUsersGridSkeleton } from "./admin-dashboard-users-grid-skeleton";
 export { AdminDashboardUsersGrid } from "./admin-dashboard-users-grid";
+export { AdminUserCardActions } from "./admin-user-card-actions";
 export type { AdminUserListItem } from "./admin-user-list-item";
 export type {
     AdminUserStatusFilter,

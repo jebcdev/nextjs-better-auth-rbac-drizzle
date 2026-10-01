@@ -74,9 +74,15 @@ export default async function PrivateDashboardUsersPage() {
                 el skeleton nunca llega a verse. La cuadrícula es un Client
                 Component que gestiona su propio estado de carga, y este límite
                 existe para el `useSearchParams` y para que el marcador tenga una
-                única definición visual (decisión D3). */}
+                única definición visual (decisión D3).
+
+                `viewerId` sale del `getSessionDetails()` que esta página YA
+                llamó para su propio guard: ni una segunda resolución de sesión
+                ni un campo nuevo en el DTO del listado. Solo viaja el id de quien
+                mira, que la tarjeta usa para no ofrecerle cambiar su propia
+                cuenta. */}
             <Suspense fallback={<AdminDashboardUsersGridSkeleton />}>
-                <AdminDashboardUsersGrid />
+                <AdminDashboardUsersGrid viewerId={currentUser.id} />
             </Suspense>
         </main>
     );

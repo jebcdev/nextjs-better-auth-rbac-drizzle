@@ -3,4 +3,5 @@ export {
     AdminDashboardUsersFilters,
     AdminDashboardUsersGridCard,
     AdminDashboardUsersGridSkeleton,
+    AdminUserCardActions,
 } from "./grid";
