@@ -1,6 +1,5 @@
 import { getSessionDetails } from "@/lib/auth/session-details";
 import {
-    MetadataGeneratorProps,
     generateAsyncTitle,
     generateAsyncDescription,
 } from "@/lib/seo";
@@ -18,7 +17,10 @@ interface Props {
 
 const allowedPageRoles: UserRole[] = [process.env.SUPER_ADMIN_ROLE as UserRole];
 // habiendo implementado la server action, de getUserById se debe de consultar aca y poner el nombre del usuario en el subtitle, para que quede algo como "Editando a {nombre del usuario}"
-const pageData: MetadataGeneratorProps = {
+// Sin anotación `MetadataGeneratorProps`: sus campos son opcionales y
+// `pageData.title` quedaría como `string | undefined`, que `PrivateDashboardHeader`
+// no acepta (de ahí el `pageData?.title!` previous).
+const pageData = {
     title: "Usuarios",
     description: "Edita la información de un usuario existente",
 };
@@ -52,7 +54,7 @@ export default async function PrivateDashboardEditViewUserPage(
     return (
         <main>
             <PrivateDashboardHeader
-                title={pageData?.title!}
+                title={pageData.title}
                 subtitle={pageData.description}
                 action={{
                     icon: <ArrowLeftIcon />,
@@ -60,7 +62,6 @@ export default async function PrivateDashboardEditViewUserPage(
                     path: "/panel/admin/usuarios",
                 }}
             />
-asdfasfadsf
             {userId}
         </main>
     );

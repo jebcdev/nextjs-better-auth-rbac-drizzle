@@ -1,6 +1,5 @@
 import { getSessionDetails } from "@/lib/auth/session-details";
 import {
-    MetadataGeneratorProps,
     generateAsyncTitle,
     generateAsyncDescription,
 } from "@/lib/seo";
@@ -10,11 +9,14 @@ import { hasRequiredRole } from "@/lib/auth/role-guard";
 import type { UserRole } from "@/lib/db/schema";
 import { PrivateDashboardHeader } from "@/features/private/dashboard/components";
 
-import { ArrowLeftIcon, PlusIcon } from "lucide-react";
+import { ArrowLeftIcon } from "lucide-react";
 
 const allowedPageRoles: UserRole[] = [process.env.SUPER_ADMIN_ROLE as UserRole];
 
-const pageData: MetadataGeneratorProps = {
+// Sin anotación `MetadataGeneratorProps`: sus campos son opcionales y
+// `pageData.title` quedaría como `string | undefined`, que `PrivateDashboardHeader`
+// no acepta (de ahí el `pageData?.title!` previous).
+const pageData = {
     title: "Usuarios",
     description: "Registra un nuevo usuario en el sistema",
 };
@@ -44,7 +46,7 @@ export default async function PrivateDashboardNewUserPage() {
     return (
         <main>
             <PrivateDashboardHeader
-                title={pageData?.title!}
+                title={pageData.title}
                 subtitle={pageData.description}
                 action={{
                     icon: <ArrowLeftIcon />,
