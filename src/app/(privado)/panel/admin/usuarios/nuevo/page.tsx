@@ -9,14 +9,14 @@ import { redirect } from "next/navigation"; // 👈 Corrección de importación 
 import { hasRequiredRole } from "@/lib/auth/role-guard";
 import type { UserRole } from "@/lib/db/schema";
 import { PrivateDashboardHeader } from "@/features/private/dashboard/components";
-import { PlusIcon } from "lucide-react";
 
+import { ArrowLeftIcon, PlusIcon } from "lucide-react";
 
 const allowedPageRoles: UserRole[] = [process.env.SUPER_ADMIN_ROLE as UserRole];
 
 const pageData: MetadataGeneratorProps = {
     title: "Usuarios",
-    description: "Gestiona los Usuarios del Sistema",
+    description: "Registra un nuevo usuario en el sistema",
 };
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -28,7 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
     };
 }
 
-export default async function PrivateDashboardUsersPage() {
+export default async function PrivateDashboardNewUserPage() {
     const { currentUser, userRole } = await getSessionDetails();
 
     // 1. Validar autenticación
@@ -44,13 +44,13 @@ export default async function PrivateDashboardUsersPage() {
     return (
         <main>
             <PrivateDashboardHeader
-            title={pageData?.title!}
-            subtitle={pageData.description}
-             action={{
-                        icon: <PlusIcon />,
-                        label: "Nuevo",
-                        path: "/panel/admin/usuarios/nuevo",
-                    }}
+                title={pageData?.title!}
+                subtitle={pageData.description}
+                action={{
+                    icon: <ArrowLeftIcon />,
+                    label: "Volver",
+                    path: "/panel/admin/usuarios",
+                }}
             />
         </main>
     );

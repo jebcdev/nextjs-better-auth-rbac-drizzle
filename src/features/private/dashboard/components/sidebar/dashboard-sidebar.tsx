@@ -34,7 +34,6 @@ export const PrivateDashboardSidebar = ({
             title: "Configuración",
             description: "Ajustes del sistema",
             icon: Settings,
-            href: "/panel/configuracion", // Soporta href en el padre
             allowedRoles: ["admin" as UserRole],
             subitems: [
                 {
