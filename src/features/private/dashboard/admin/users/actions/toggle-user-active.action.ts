@@ -8,7 +8,7 @@
 //
 // ⚠️ Una server action es POSTeable directamente y NO hereda el guard de la
 // página. Este archivo es el único punto donde se decide si la llamada
-// prospera, y usa el MISMO `hasRequiredCsvRole` con la MISMA constante
+// prospera, y usa el MISMO `hasRequiredRole` con la MISMA constante
 // `ADMIN_USERS_ROLES` que la página y que el listado, para que las tres reglas
 // no puedan divergir.
 
@@ -17,7 +17,7 @@ import { eq } from "drizzle-orm";
 import drizzleDB from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { getSessionDetails } from "@/lib/auth/session-details";
-import { hasRequiredCsvRole } from "@/lib/auth/role-guard";
+import { hasRequiredRole } from "@/lib/auth/role-guard";
 import { consoleLogger } from "@/lib/logger/console-logger";
 import { IGeneralResponse } from "@/features/shared/types";
 import { ADMIN_USERS_ROLES } from "../components/grid";
@@ -127,7 +127,7 @@ export const toggleUserActiveAction = async (
             };
         }
 
-        if (!hasRequiredCsvRole(userRole, ADMIN_USERS_ROLES)) {
+        if (!hasRequiredRole(userRole, ADMIN_USERS_ROLES)) {
             logOutcome("unauthorized");
             return {
                 success: false,

@@ -1,3 +1,5 @@
+import type { UserRole } from "@/lib/db/schema";
+
 /**
  * `AdminUserListItem` — la ÚNICA forma de una fila de usuario que puede cruzar
  * la frontera servidor/cliente desde el listado del panel de administración.
@@ -11,11 +13,11 @@
  * Reglas que este tipo respeta:
  * - Solo lo que la tarjeta dibuja. Ni `emailVerified`, ni `banReason`, ni
  *   `banExpires`, ni `tenantId`: son inventario que nadie pidió.
- * - `role` es `string`, no `UserRole`. La columna es `text` y el plugin admin de
- *   better-auth guarda multi-rol como CSV (`setRole` acepta `string[]`), así que
- *   un valor como `"user,admin"` es legal. `UserRole` es el conjunto *conocido*
- *   en la app, no el dominio de la columna; tipar aquí como `UserRole` sería una
- *   mentira que la tarjeta tendría que deshacer en runtime.
+ * - `role` es `UserRole`, el dominio real de la columna. `users.role` es un
+ *   `pgEnum` (`userRoleEnum`), así que una cuenta lleva UN valor del conjunto y
+ *   nada fuera de él: tiparlo como `UserRole` dice la verdad y la tarjeta no
+ *   tiene que deshacerla en runtime. Un rol es un dato, no texto libre que
+ *   pueda venir en CSV o ser unrecognized.
  * - `isActive` y `banned` son `boolean` y no `boolean | null`: ambas columnas
  *   son nullable en el esquema y el resto de la app ya las lee por veracidad, así
  *   que la normalización ocurre UNA vez, aquí en el action con `?? false`. La
@@ -28,8 +30,8 @@ export interface AdminUserListItem {
     name: string;
     email: string;
     image: string | null;
-    /** CSV de roles, tal y como lo almacena el plugin admin. Ver la nota de cabecera. */
-    role: string;
+    /** Un solo rol, tal y como lo declara el enum de la columna. */
+    role: UserRole;
     isActive: boolean;
     banned: boolean;
     /** ISO 8601. */

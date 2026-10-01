@@ -22,13 +22,16 @@
  *   representación en runtime, y formatearlo en el cliente exigiría decidir
  *   locale y zona horaria. Emitir ISO una vez, en el servidor, mantiene honesto
  *   el tipo del cliente.
- * - `role` es `string`, no `UserRole`. La columna es `text` a propósito: el plugin
- *   admin escribe multi-rol como CSV (`setRole` acepta `string[]`) y los roles
- *   registrados con `ac.newRole()` son abiertos. `UserRole` es el conjunto
- *   *conocido en la app*, no el dominio cerrado de la base de datos; tipar aquí
- *   como `UserRole` sería una mentira que la vista tendría que deshacer en
- *   runtime (ver `getUserRoleLabel` y su respaldo al valor crudo).
+ * - `role` es `UserRole`, no `string`. `users.role` es un `pgEnum`
+ *   (`userRoleEnum`), así que el dominio de la columna es exactamente el
+ *   conjunto de tres valores que el enum declara: una cuenta no puede llevar
+ *   varios roles ni un valor fuera de él. Tiparlo como `UserRole` dice la
+ *   verdad y deja de obligar a la vista a deshacerla en runtime —con
+ *   `USER_ROLE_LABELS` siendo `Record<UserRole, string>`, resolver la etiqueta
+ *   ya no necesita ni guarda ni respaldo al valor crudo (decisión D5).
  */
+
+import type { UserRole } from "@/lib/db/schema";
 
 /** Cuenta vinculada, sin ningún secreto. */
 export interface ProfileAccountSummary {
@@ -66,8 +69,8 @@ export interface ProfileViewModel {
     name: string;
     email: string;
     image: string | null;
-    /** Ver la nota de cabecera: `text` + CSV del plugin admin ⇒ `string`. */
-    role: string;
+    /** Un solo rol, tal y como lo declara el enum de la columna. */
+    role: UserRole;
     emailVerified: boolean;
     isActive: boolean;
     banned: boolean;

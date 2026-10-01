@@ -6,12 +6,10 @@ import {
 import type { Metadata } from "next";
 import { redirect } from "next/navigation"; // 👈 Corrección de importación recomendada
 import { hasRequiredRole } from "@/lib/auth/role-guard";
-import type { UserRole } from "@/lib/db/schema";
 import { PrivateDashboardHeader } from "@/features/private/dashboard/components";
+import { ADMIN_USERS_ROLES } from "@/features/private/dashboard/admin/users/components/grid";
 
 import { ArrowLeftIcon } from "lucide-react";
-
-const allowedPageRoles: UserRole[] = [process.env.SUPER_ADMIN_ROLE as UserRole];
 
 // Sin anotación `MetadataGeneratorProps`: sus campos son opcionales y
 // `pageData.title` quedaría como `string | undefined`, que `PrivateDashboardHeader`
@@ -39,7 +37,12 @@ export default async function PrivateDashboardNewUserPage() {
     }
 
     // 2. Validar autorización por rol con el helper
-    if (!hasRequiredRole(userRole, allowedPageRoles)) {
+    //
+    // Los roles permitidos vienen de la MISMA constante compartida que usan
+    // las otras dos páginas del directorio y sus tres actions. Un array
+    // declarado aquí sería una segunda copia de la regla de autorización a
+    // un archivo de distancia.
+    if (!hasRequiredRole(userRole, ADMIN_USERS_ROLES)) {
         return redirect("/panel"); // O a una página de acceso denegado
     }
 

@@ -29,6 +29,14 @@ import {
  * `refreshToken`, `idToken` y `sessions.token`; que este componente no pueda
  * ni siquiera nombrarlos es lo que impide que la fuga vuelva por la puerta de
  * atrás cuando se añada una columna nueva al esquema.
+ *
+ * ⚠️ El rol se pinta directamente contra el mapa de etiquetas, sin guarda y
+ * sin respaldo al valor crudo: `profile.role` es `UserRole` y
+ * `USER_ROLE_LABELS` es `Record<UserRole, string>`, así que todo rol del enum
+ * tiene etiqueta por definición. El predicado de pertenencia y la lista
+ * literal que existían aquí eran una segunda copia del conjunto de roles, y
+ * una defensa contra un valor que la columna ya no puede contener. Sin esa
+ * copia, añadir un rol al mapa lo hace aparecer aquí sin editar este archivo.
  */
 type Props = {
     profile: ProfileViewModel;
@@ -52,25 +60,6 @@ const initialsOf = (name: string): string => {
     // utilizables: se cae al primer carácter real del nombre.
     return initials || name.trim().charAt(0).toUpperCase() || "?";
 };
-
-/**
- * Etiqueta legible del rol, con respaldo al valor crudo (decisión D17).
- *
- * `role` es `string` en el DTO a propósito: la columna es `text` y el plugin
- * admin escribe multi-rol como CSV, así que un valor como `"user,admin"` compila
- * sin error y `USER_ROLE_LABELS["user,admin"]` devuelve `undefined` en runtime.
- * Sin este filtro el distintivo saldría vacío. El filtro es una prueba de
- * pertenencia al conjunto conocido, NO una segunda copia del mapa de etiquetas:
- * si el mapa crece, el respaldo sigue funcionando sin tocarlo.
- */
-const KNOWN_ROLES = ["admin", "user", "guest"] as const;
-type KnownRole = (typeof KNOWN_ROLES)[number];
-
-const isKnownRole = (role: string): role is KnownRole =>
-    (KNOWN_ROLES as readonly string[]).includes(role);
-
-const roleLabelOf = (role: string): string =>
-    isKnownRole(role) ? getUserRoleLabel(role) : role;
 
 /** Formatea una fecha ISO en texto legible. */
 const formatDate = (iso: string): string =>
@@ -142,7 +131,7 @@ export const ProfileDetails = ({ profile }: Props) => {
                                 variant="secondary"
                                 data-slot="role-badge"
                             >
-                                {roleLabelOf(profile.role)}
+                                {getUserRoleLabel(profile.role)}
                             </Badge>
                             <Badge
                                 variant={

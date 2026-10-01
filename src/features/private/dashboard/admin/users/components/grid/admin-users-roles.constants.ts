@@ -3,11 +3,12 @@ import type { UserRole } from "@/lib/db/schema";
 /**
  * Los roles con los que se entra al directorio de usuarios.
  *
- * ⚠️ Esta constante se declara UNA vez y la importan tanto la página como la
- * server action. Antes cada una declaraba su propio array inline, que son dos
+ * ⚠️ Esta constante se declara UNA vez y la importan las TRES páginas del
+ * directorio (`usuarios`, `usuarios/nuevo`, `usuarios/[userId]`) y sus tres
+ * server actions. Antes cada una declaraba su propio array inline, que son
  * copias de la regla de autorización a un archivo de distancia: exactamente el
  * tipo de duplicación que permite que la página y la action se desincronicen
- * (decisión D10).
+ * (decisiones D10 y D8).
  *
  * ⚠️ Este es el ÚNICO módulo del feature que lee `process.env`, y por eso tiene
  * su propio archivo separado del resto de constantes. Next.js solo inlinea las
@@ -18,7 +19,7 @@ import type { UserRole } from "@/lib/db/schema";
  *
  * ⚠️ Que valga `[undefined]` en el navegador no es solo un defecto de render: si
  * alguien lo filtra para "limpiar" el valor falsy, el array quedaría vacío y
- * `hasRequiredCsvRole` entraría por su rama `allowedRoles.length === 0`, que
+ * `hasRequiredRole` entraría por su rama `allowedRoles.length === 0`, que
  * **permite el paso a cualquiera**. Un env sin definir debe seguir fallando
  * cerrado.
  *

@@ -8,8 +8,9 @@
 //
 // ⚠️ Una server action es POSTeable directamente y NO hereda el guard de la
 // página. Por eso esta acción vuelve a derivar su sujeto desde la sesión y a
-// comprobar el rol ella misma, con la MISMA función que la página, para que las
-// dos reglas no puedan divergir.
+// comprobar el rol ella misma, con el MISMO `hasRequiredRole` y la MISMA
+// constante `ADMIN_USERS_ROLES` que la página, para que las dos reglas no puedan
+// divergir.
 
 import {
     and,
@@ -18,7 +19,6 @@ import {
     eq,
     ilike,
     isNull,
-    like,
     or,
     type SQL,
 } from "drizzle-orm";
@@ -26,7 +26,7 @@ import {
 import drizzleDB from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { getSessionDetails } from "@/lib/auth/session-details";
-import { hasRequiredCsvRole } from "@/lib/auth/role-guard";
+import { hasRequiredRole } from "@/lib/auth/role-guard";
 import { consoleLogger } from "@/lib/logger/console-logger";
 import { IGeneralResponse } from "@/features/shared/types";
 import {
@@ -68,28 +68,6 @@ function toAdminUserListItem(
         updatedAt: row.updatedAt.toISOString(),
     };
 }
-
-/**
- * Predicado CSV-aware: ¿la cuenta tiene el rol R como token completo?
- *
- * Cuatro Arms porque un `eq` a secas descarta el multi-rol y un `%R%` a secas
- * produce falsos positivos (`user` dentro de `poweruser`):
- *
- *   `R` | `R,...` | `...,R` | `...,R,...`
- *
- * `setRole` une con `","` y sin espacio, así que el plugin nunca escribe
- * `"user, admin"`. Una fila importada a mano podría, y entonces no coincidiría —
- *ver Riesgos del design. Arreglarlo en SQL con `replace(role, ' ', '')`
- * corrompería cualquier nombre de rol legítimo con espacios, que es un peor
- * trueque (decisión D5).
- */
-const roleCondition = (role: string): SQL | undefined =>
-    or(
-        eq(users.role, role),
-        like(users.role, `${role},%`),
-        like(users.role, `%,${role}`),
-        like(users.role, `%,${role},%`),
-    );
 
 /**
  * Predicados de estado.
@@ -135,7 +113,7 @@ export const getAllUsersAction = async (
 
         if (
             !isAuthenticated ||
-            !hasRequiredCsvRole(userRole, ADMIN_USERS_ROLES)
+            !hasRequiredRole(userRole, ADMIN_USERS_ROLES)
         ) {
             consoleLogger({
                 action: "getAllUsersAction",
@@ -183,8 +161,15 @@ export const getAllUsersAction = async (
             );
         }
 
+        // ⚠️ Igualdad contra el enum, no una búsqueda de subcadena. `users.role` es
+        // un `pgEnum`: una cuenta lleva UN rol, así que «tiene este rol» es una
+        // igualdad y nada más. Además, `like` ni siquiera es aplicable aquí —
+        // Postgres no tiene comparación implícita entre un enum y `~~`, así que
+        // la consulta fallaba en runtime la primera vez que alguien filtraba por
+        // rol (decisión D1). Y un `like` sí tendría el falso positivo que el
+        // spec prohíbe: `user` dentro de `poweruser`.
         if (role) {
-            push(roleCondition(role));
+            push(eq(users.role, role));
         }
 
         // `all` y ausente no imponen ninguna condición, así que `push` descarta

@@ -95,7 +95,7 @@ export interface AdminUsersListParams extends PaginationParams {
 En `actions/get-all-tu-feature.action.ts`:
 
 - Usa `"use server"` **solo** (no `server-only` si lo llamas desde un hook cliente).
-- Revalida al llamador con tu guard (por ejemplo `getSessionDetails()` + `hasRequiredCsvRole`).
+- Revalida al llamador con tu guard (por ejemplo `getSessionDetails()` + `hasRequiredRole`).
 - Acepta **solo** parámetros —nunca un id de cuenta para "desviar" qué cuentas devuelve.
 - Normaliza y acota con el módulo:
 

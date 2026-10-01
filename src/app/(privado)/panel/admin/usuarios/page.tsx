@@ -6,7 +6,7 @@ import {
 } from "@/lib/seo";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation"; // 👈 Corrección de importación recomendada
-import { hasRequiredCsvRole } from "@/lib/auth/role-guard";
+import { hasRequiredRole } from "@/lib/auth/role-guard";
 import { PrivateDashboardHeader } from "@/features/private/dashboard/components";
 import {
     ADMIN_USERS_ROLES,
@@ -45,15 +45,16 @@ export default async function PrivateDashboardUsersPage() {
 
     // 2. Validar autorización por rol con el helper
     //
-    // ⚠️ `hasRequiredCsvRole` y no `hasRequiredRole`: `userRole` es la cadena CSV
-    // cruda que `getSessionDetails()` castea, así que una cuenta con
-    // `role = "user,admin"` sería rechazada por la comparación entera. Es el
-    // MISMO helper que usa la action del listado, y esa es la única forma de que
-    // la regla de la página y la de la action no se desincronicen (decisión D20).
+    // Es el MISMO helper que usan las tres actions del directorio, y esa es la
+    // única forma de que la regla de la página y la de las actions no se
+    // desincronicen. `users.role` es un `pgEnum`, así que `userRole` es un valor
+    // del conjunto y la comparación entera es la correcta: no hay una lista de
+    // roles que repartir ni un token que recortar.
+    //
     // Los roles permitidos vienen de la constante compartida, no de un array
     // declarado aquí: dos copias de la regla de autorización, a un archivo de
     // distancia, es exactamente lo que se quiere evitar (decisión D10).
-    if (!hasRequiredCsvRole(userRole, ADMIN_USERS_ROLES)) {
+    if (!hasRequiredRole(userRole, ADMIN_USERS_ROLES)) {
         return redirect("/panel"); // O a una página de acceso denegado
     }
 

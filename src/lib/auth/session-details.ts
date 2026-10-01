@@ -3,10 +3,6 @@
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
 import drizzleDB from "../db";
-import {
-
-    type UserRole,
-} from "../db/schema";
 
 export async function getSessionDetails() {
     const session = await auth.api.getSession({ headers: await headers() });
@@ -50,7 +46,14 @@ export async function getSessionDetails() {
 
     return {
         isAuthenticated: true,
-        userRole: session.user.role as UserRole | undefined,
+        // ⚠️ El rol sale de `userRow`, NO de `session.user.role`. La fila de
+        // `users` lo trae tipado como `UserRole` porque la columna es un
+        // `pgEnum`, así que el valor fluye sin `as`. `session.user.role` llega
+        // como `string` —better-auth declara `additionalFields.role.type:
+        // "string"`— y usarlo obligaría a devolver un cast otra vez (decisión D7).
+        // Es el mismo rol de la misma fila que esta función ya leía para decidir
+        // si la cuenta es usable, así que nada observable cambia.
+        userRole: userRow.role,
         currentUser: session.user,
         currentSession: session.session,
         fullUserDetails: userRow,

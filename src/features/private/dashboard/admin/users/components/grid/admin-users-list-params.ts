@@ -37,7 +37,15 @@ export type AdminUserRoleFilter = UserRole | "all";
  * tipo compartido no se ensancha con un campo por listado.
  */
 export interface AdminUsersListParams extends PaginationParams {
-    /** Rol a filtrar. Ausente o vacío = sin restricción. */
+    /**
+     * Rol a filtrar. Ausente = sin restricción.
+     *
+     * ⚠️ El tipo es `UserRole` y por eso el comentario no dice «vacío»: es el
+     * mismo enum que declara la columna, así que no existe un rol vacío ni un
+     * rol fuera del conjunto. La opción «sin filtro» se representa por la
+     * AUSENCIA de la clave —o por `all` en el `Select`, que `updateParam`
+     * borra al recibir `null`—, nunca por una cadena que haya que interpretar.
+     */
     role?: UserRole;
     /** Estado a filtrar. `all` y ausente significan ambos «sin restricción». */
     status?: AdminUserStatusFilter;

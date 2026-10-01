@@ -7,7 +7,7 @@
 //
 // ⚠️ Una server action es POSTeable directamente y NO hereda el guard de la
 // página. Este es el único punto donde se decide si la llamada prospera, con el
-// MISMO `hasRequiredCsvRole` y la MISMA constante `ADMIN_USERS_ROLES` que la
+// MISMO `hasRequiredRole` y la MISMA constante `ADMIN_USERS_ROLES` que la
 // página, que el listado y que la acción de activar.
 
 import { headers } from "next/headers";
@@ -15,7 +15,7 @@ import { headers } from "next/headers";
 import { auth } from "@/lib/auth/auth";
 import drizzleDB from "@/lib/db";
 import { getSessionDetails } from "@/lib/auth/session-details";
-import { hasRequiredCsvRole } from "@/lib/auth/role-guard";
+import { hasRequiredRole } from "@/lib/auth/role-guard";
 import { consoleLogger } from "@/lib/logger/console-logger";
 import { IGeneralResponse } from "@/features/shared/types";
 import { ADMIN_USERS_ROLES } from "../components/grid";
@@ -125,7 +125,7 @@ export const toggleUserBanAction = async (
             };
         }
 
-        if (!hasRequiredCsvRole(userRole, ADMIN_USERS_ROLES)) {
+        if (!hasRequiredRole(userRole, ADMIN_USERS_ROLES)) {
             logOutcome("unauthorized");
             return {
                 success: false,

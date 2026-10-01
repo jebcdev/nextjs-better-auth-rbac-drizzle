@@ -3,10 +3,10 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
-        "dev": "next dev",
-        "build": "next build",
+        "dev": "clear && next dev",
+        "build": "clear && next build",
         "start": "clear && rm -rf .next && next build && next start",
-        "lint": "eslint",
+        "lint": "clear && eslint",
         "seed": "rm -rf drizzle && pnpm drizzle-kit generate && pnpm drizzle-kit migrate && pnpm tsx ./src/lib/db/seeders/index.ts "
     },
     "dependencies": {
