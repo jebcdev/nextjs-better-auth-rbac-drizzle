@@ -22,8 +22,16 @@ interface Props {
  * El spec pide un marcador «derivado del nombre del usuario» en vez de una
  * imagen rota o vacía. Se toman de las dos primeras palabras, que es lo que
  * distingue a una persona de otra en un listado de equipo.
+ *
+ * ⚠️ Se EXPORTA porque el formulario de alta y edición necesita exactamente el
+ * mismo marcador para la previsualización del avatar, y dos copias de esta
+ * función acabarían divergiendo: la tarjeta mostrando «AR» y el formulario «A»
+ * para la misma cuenta, según cuál de las dos se hubiera tocado antes. La
+ * función vive aquí porque la tarjeta es su primer consumidor, no porque sea su
+ *dueña; el barrel de `grid/` la reexporta para que el formulario la importe sin
+ * leer un archivo de componente.
  */
-const initialsOf = (name: string): string => {
+export const initialsOf = (name: string): string => {
     const words = name.trim().split(/\s+/).filter(Boolean);
     const letters = words
         .slice(0, 2)

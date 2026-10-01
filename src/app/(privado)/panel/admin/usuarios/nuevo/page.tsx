@@ -7,7 +7,10 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation"; // 👈 Corrección de importación recomendada
 import { hasRequiredRole } from "@/lib/auth/role-guard";
 import { PrivateDashboardHeader } from "@/features/private/dashboard/components";
-import { ADMIN_USERS_ROLES } from "@/features/private/dashboard/admin/users/components/grid";
+import {
+    DashboardAdminUsersForm,
+    ADMIN_USERS_ROLES,
+} from "@/features/private/dashboard/admin/users/components";
 
 import { ArrowLeftIcon } from "lucide-react";
 
@@ -57,6 +60,14 @@ export default async function PrivateDashboardNewUserPage() {
                     path: "/panel/admin/usuarios",
                 }}
             />
+
+            {/* ⚠️ La página NO pasa ningún DTO: en alta no hay cuenta previa, así
+                que `user` se omite y el formulario arranca vacío con el rol por
+                defecto. La propia action vuelve a comprobar sesión y rol, porque
+                este guard de la página no se hereda en un POST directo. */}
+            <div className="w-full">
+                <DashboardAdminUsersForm mode="create" />
+            </div>
         </main>
     );
 }
