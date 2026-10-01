@@ -203,3 +203,4 @@ export type FullUser = UsersSelect & {
     sessions: SessionsSelect[];
     accounts: AccountsSelect[];
 };
+export type UserRole = (typeof userRoleEnum.enumValues)[number];
