@@ -3,11 +3,11 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
-        "dev": "clear && next dev",
-        "build": "clear && next build",
-        "start": "clear && rm -rf .next && next build && next start",
-        "lint": "clear && eslint",
-        "seed": "rm -rf drizzle && pnpm drizzle-kit generate && pnpm drizzle-kit migrate && pnpm tsx ./src/lib/db/seeders/index.ts "
+        "dev": "next dev",
+        "build": "next build",
+        "start": "rm -rf .next && next build && next start",
+        "lint": "eslint",
+        "seed": "rm -rf drizzle && pnpm drizzle-kit generate && pnpm tsx ./src/lib/db/seeders/_reset-db.ts && pnpm drizzle-kit migrate && pnpm tsx ./src/lib/db/seeders/index.ts"
     },
     "dependencies": {
         "@base-ui/react": "^1.8.0",
