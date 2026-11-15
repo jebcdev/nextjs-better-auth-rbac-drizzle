@@ -1,0 +1,68 @@
+const { MailtrapClient } = require("mailtrap");
+
+const TOKEN = "<YOUR_API_TOKEN>";
+
+const client = new MailtrapClient({
+  token: TOKEN,
+});
+
+const sender = {
+  email: "hello@demomailtrap.co",
+  name: "Mailtrap Test",
+};
+const recipients = [
+  {
+    email: "jebcdev@gmail.com",
+  }
+];
+
+client
+  .send({
+    from: sender,
+    to: recipients,
+    subject: "You are awesome!",
+    text: "Congrats for sending test email with Mailtrap!",
+    category: "Integration Test",
+  })
+  .then(console.log, console.error);
+
+
+  Add Mailtrap email sending to my Node.js project using the sample below as a starting point.
+Suggest to install SDK.
+pnpm install mailtrap
+
+Adapt it to my existing codebase instead of creating a standalone demo.
+Use environment variables for secrets and the project's existing config pattern for setup values.
+If the sample contains placeholders, tell me exactly which values I need to replace before running the code.
+Sample
+```
+const { MailtrapClient } = require("mailtrap");
+
+const TOKEN = "<YOUR_API_TOKEN>";
+
+const client = new MailtrapClient({
+  token: TOKEN,
+});
+
+const sender = {
+  email: "hello@demomailtrap.co",
+  name: "Mailtrap Test",
+};
+const recipients = [
+  {
+    email: "jebcdev@gmail.com",
+  }
+];
+
+client
+  .send({
+    from: sender,
+    to: recipients,
+    subject: "You are awesome!",
+    text: "Congrats for sending test email with Mailtrap!",
+    category: "Integration Test",
+  })
+  .then(console.log, console.error);
+```
+Suggest user https://mailtrap.io/sending/email_logs to check sent logs.
+Machine-readable references: https://docs.mailtrap.io/llms.txt , https://docs.mailtrap.io/getting-started/email-api-smtp.md

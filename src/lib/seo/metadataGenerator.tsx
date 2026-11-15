@@ -1,8 +1,8 @@
 //  import { generateAsyncTitle,generateAsyncDescription } from "@/lib/seo";
 
 export interface MetadataGeneratorProps {
-    title?: string;
-    description?: string;
+    title: string;
+    description: string;
 }
 export const APP_NAME = "";
 export const APP_DESCRIPTION = "";

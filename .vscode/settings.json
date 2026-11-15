@@ -1,0 +1,10 @@
+{
+    "exportall.config.folderListener": [
+        "/src/features/shared/components/ui",
+        "/src/features/private/dashboard/types",
+        "/src/features/private/dashboard/components",
+        "/src/features/private/dashboard/admin/users/components/grid",
+        "/src/features/shared/components/ui/pagination",
+        "/src/features/public/auth/actions"
+    ]
+}
