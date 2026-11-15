@@ -112,7 +112,7 @@ export const LoginForm = () => {
             <p className="text-sm text-center text-muted-foreground">
                 ¿No tienes cuenta?{" "}
                 <Link
-                    href="/registro"
+                    href="/registrarse"
                     className="underline hover:text-primary"
                 >
                     Créala aquí

@@ -49,18 +49,19 @@ export const PrivateDashboardHeader = ({
                 {action && (
                     <div className="flex shrink-0 flex-wrap items-center gap-2">
                         {action.path ? (
+                            // `render={<Link />}` y no `<Link>` dentro de un
+                            // `<Button>`: un `<a>` anidado en un `<button>` es
+                            // un elemento interactivo dentro de otro. base-ui
+                            // compone con `render` y `nativeButton={false}`.
                             <Button
-                                
                                 variant={action.variant ?? "default"}
                                 size="sm"
+                                nativeButton={false}
+                                render={<Link href={action.path} />}
+                                className="gap-2"
                             >
-                                <Link
-                                    href={action.path}
-                                    className="inline-flex items-center gap-2"
-                                >
-                                    {action.icon}
-                                    <span>{action.label}</span>
-                                </Link>
+                                {action.icon}
+                                <span>{action.label}</span>
                             </Button>
                         ) : (
                             <Button

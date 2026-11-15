@@ -105,7 +105,7 @@ export const RegisterForm = () => {
 
       <p className="text-sm text-center text-muted-foreground">
         ¿Ya tienes cuenta?{" "}
-        <Link href="/inicio" className="underline hover:text-primary">
+        <Link href="/iniciar-sesion" className="underline hover:text-primary">
           Inicia aquí
         </Link>
       </p>

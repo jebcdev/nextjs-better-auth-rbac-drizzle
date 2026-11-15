@@ -69,8 +69,8 @@ Scripts in `package.json` are only `dev`, `build`, `start`, `lint`, `seed`. Ther
 
 # Known defects — don't copy these patterns
 
-- `features/private/dashboard/components/dashboard-header.tsx` still nests a `<Link>` inside a `<Button>` for its `action.path` branch (interactive element inside another). The correct base-ui form is `render={<Link href=… />}`; see `[userId]/page.tsx` for the fixed version.
-- `login-form.tsx` links to `/registro`; the real route is `/registrarse`. `public-header.tsx` links to `/panel` from a public page.
+- `features/private/dashboard/components/dashboard-header.tsx` used to nest a `<Link>` inside a `<Button>`; it now composes with `nativeButton={false}` + `render={<Link … />}`, the same form as `admin-user-card-actions.tsx`. Any new link styled as a button must do the same, never nest `<a>` in `<button>`.
+- `public-header.tsx` links to `/panel` only when `currentUser` exists; that is intentional, not a defect.
 - The comment block in `src/lib/db/schema.ts` (just above the inferred types) claims `role` is `text` to support multi-role CSV. That is **stale** — the column is a `pgEnum` and the code is right; ignore the comment.
 - `admin-users-roles.constants.ts` claims `.env.example` carries `SUPER_ADMIN_ROLE="super_admin"`. It no longer does — the example is `"admin"`, matching `adminRoles` in `auth.ts`. Don't "fix" the example back to `super_admin`; that value is not in the enum and every admin page would redirect.
 - `private/dashboard/admin/users/index.ts` was deleted; a barrel at the feature root is not the convention.

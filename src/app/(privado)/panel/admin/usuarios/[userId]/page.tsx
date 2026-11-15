@@ -101,12 +101,13 @@ export default async function PrivateDashboardEditViewUserPage({
                     </p>
                     <div>
                         {/* ⚠️ `render={<Link />}` y no `<Link>` dentro de un
-                            `<button>`: base-ui compone con `render`, y un `<a>`
-                            anidado en un `<button>` es un elemento interactivo
-                            dentro de otro. Es el mismo error que arrastra
-                            `dashboard-header.tsx`. */}
+                            `<button>`: base-ui compone con `render` y
+                            `nativeButton={false}`, y un `<a>` anidado en un
+                            `<button>` es un elemento interactivo dentro de
+                            otro. */}
                         <Button
                             variant="outline"
+                            nativeButton={false}
                             render={
                                 <Link href="/panel/admin/usuarios" />
                             }
